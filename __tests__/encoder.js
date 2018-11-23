@@ -1,4 +1,4 @@
-import { Encoder } from '../dist';
+import { Encoder } from '../src';
 
 describe('Encoding', () => {
   test('initial state is idle', () => {
