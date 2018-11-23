@@ -85,7 +85,7 @@ export class Encoder {
     ) {
       throw new RangeError('Data is out of range');
     }
-    if (this.state === 'start' || this.state === 'data') {
+    if (this.state !== 'idle') {
       throw new Error('Previous data is not encoded yet');
     }
     this.state = 'start';
