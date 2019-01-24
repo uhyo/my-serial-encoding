@@ -1,1 +1,2 @@
-export { Encoder, EncoderOptions } from './encoder';
+export { Encoder, EncodingOptions } from './encoder';
+export { Decoder } from './decoder';

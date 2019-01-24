@@ -1,11 +1,11 @@
-import { EncoderOptions, defaultOptions, validateOptions } from './options';
+import { EncodingOptions, defaultOptions, validateOptions } from '../options';
 
 /**
  * State of encoder.
  */
 export type State = 'idle' | 'start' | 'data' | 'parity' | 'end';
 
-export { EncoderOptions };
+export { EncodingOptions };
 
 export class Encoder {
   private state: State = 'idle';
@@ -15,13 +15,13 @@ export class Encoder {
   /**
    * Number of bits of data.
    */
-  public readonly options: Readonly<EncoderOptions>;
+  public readonly options: Readonly<EncodingOptions>;
 
   /**
    *
    * @param options options.
    */
-  constructor(options?: Partial<EncoderOptions>) {
+  constructor(options?: Partial<EncodingOptions>) {
     const opts = {
       ...defaultOptions,
       ...options,

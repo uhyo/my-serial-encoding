@@ -1,8 +1,8 @@
 /**
- * Options for encoder.
+ * Options for encoding of data.
  * @package
  */
-export interface EncoderOptions {
+export interface EncodingOptions {
   /**
    * Number of bits of data.
    * Should be an integer between 0 and 52.
@@ -22,7 +22,7 @@ export interface EncoderOptions {
  * Default values of options.
  * @package
  */
-export const defaultOptions: EncoderOptions = {
+export const defaultOptions: EncodingOptions = {
   bits: 8,
   order: 'LtM',
   parity: 0,
@@ -32,7 +32,7 @@ export const defaultOptions: EncoderOptions = {
  * Validate given options and throws an error if invalid.
  * @package
  */
-export function validateOptions(opts: EncoderOptions) {
+export function validateOptions(opts: EncodingOptions) {
   const { bits } = opts;
   if (!Number.isInteger(bits) || bits < 0 || 53 < bits) {
     throw new RangeError('Number of bits is out of range');
