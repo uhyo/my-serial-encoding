@@ -1,9 +1,10 @@
 import { EncodingOptions, defaultOptions, validateOptions } from '../options';
+import { ErrorObject } from './error';
 
 /**
  * State of decoder.
  */
-export type State = 'idle' | 'start' | 'data' | 'parity' | 'end';
+export type State = 'idle' | 'start' | 'data' | 'parity' | 'end' | 'error';
 
 export class Decoder {
   private state: State = 'idle';
@@ -13,6 +14,10 @@ export class Decoder {
    * Received data.
    */
   public data: number = 0;
+  /**
+   * Current error.
+   */
+  public error: ErrorObject | null = null;
 
   /**
    * Options given to this decoder.
@@ -36,15 +41,16 @@ export class Decoder {
    */
   public tick(bit: 0 | 1): void {
     switch (this.state) {
-      case 'idle': {
+      case 'idle':
+      case 'end': {
         if (bit === 1) {
           // received no data.
-          return;
+          this.state = 'idle';
         } else {
           // received a start bit.
           this.start();
-          return;
         }
+        break;
       }
       case 'start': {
         // received first bit of data.
@@ -74,6 +80,7 @@ export class Decoder {
     this.state = 'start';
     this.bitIndex = 0;
     this.currentParity = 0;
+    this.data = 0;
   }
   /**
    * Receive one bit of data.
