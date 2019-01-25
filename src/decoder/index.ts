@@ -130,7 +130,7 @@ export class Decoder {
     this.currentParity ^= bit;
     if (this.bitIndex === this.options.bits) {
       // received all data.
-      this.state = this.options.parity != null ? 'parity' : 'end';
+      this.state = this.options.parity != null ? 'parity' : 'stop';
     }
   }
 

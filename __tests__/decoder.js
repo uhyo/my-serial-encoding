@@ -254,6 +254,111 @@ describe('Decoder', () => {
       expect(decoder.getState()).toBe('idle');
     });
   });
+  describe('options', () => {
+    test('bits', () => {
+      const decoder = new Decoder({
+        bits: 4,
+      });
+      writeAll(decoder, [
+        0, // start bit
+        0, // 4 bit data
+        1,
+        1,
+        1,
+        1, // parity bit
+        1, // stop bit
+      ]);
+      expect(decoder.getState()).toBe('end');
+      expect(decoder.data).toBe(0b1110);
+    });
+    test('odd parity', () => {
+      const decoder = new Decoder({
+        parity: 1,
+      });
+      writeAll(decoder, [
+        0, // start bit
+        1, // 8 bit data
+        0,
+        1,
+        0,
+        1,
+        1,
+        0,
+        0,
+        1, // parity bit
+        1, // stop bit
+      ]);
+      expect(decoder.getState()).toBe('end');
+      expect(decoder.data).toBe(0b00110101);
+    });
+    test('no parity', () => {
+      const decoder = new Decoder({
+        parity: null,
+      });
+      writeAll(decoder, [
+        0, // start bit
+        1, // 8 bit data
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+      ]);
+      expect(decoder.getState()).toBe('stop');
+      expect(decoder.data).toBe(0b10100101);
+      decoder.tick(1); // stop bit
+      expect(decoder.getState()).toBe('end');
+      expect(decoder.data).toBe(0b10100101);
+    });
+    test('order', () => {
+      const decoder = new Decoder({
+        order: 'MtL',
+      });
+      writeAll(decoder, [
+        0, // start bit
+        1, // 8 bit data
+        0,
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        0, // parity
+        1, // stop bit
+      ]);
+      expect(decoder.getState()).toBe('end');
+      expect(decoder.data).toBe(0b10100101);
+    });
+    test('combination of options', () => {
+      const decoder = new Decoder({
+        bits: 12,
+        order: 'MtL',
+        parity: 1,
+      });
+      writeAll(decoder, [
+        0, // start bit
+        1, // 12 bit data
+        1,
+        1,
+        0,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0, // parity
+        1, // stop bit
+      ]);
+      expect(decoder.getState()).toBe('end');
+      expect(decoder.data).toBe(0b111001100011);
+    });
+  });
 });
 
 /**
