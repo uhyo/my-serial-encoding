@@ -37,7 +37,7 @@ describe('Decoder', () => {
       ]);
       expect(decoder.getState()).toBe('parity');
     });
-    test('state changes to end after receiving parity bit', () => {
+    test('state changes to stop after receiving parity bit', () => {
       const decoder = new Decoder();
       writeAll(decoder, [
         0, // start bit
@@ -51,9 +51,9 @@ describe('Decoder', () => {
         1, // 8 bit data
         1, // correct parity bit
       ]);
-      expect(decoder.getState()).toBe('end');
+      expect(decoder.getState()).toBe('stop');
     });
-    test('data is correct when state is end', () => {
+    test('data is correct when state is stop', () => {
       const decoder = new Decoder();
       writeAll(decoder, [
         0, // start bit
@@ -69,6 +69,24 @@ describe('Decoder', () => {
       ]);
       expect(decoder.data).toBe(0b10101110);
     });
+    test('state is end after receiving stop bit', () => {
+      const decoder = new Decoder();
+      writeAll(decoder, [
+        0, // start bit
+        0, // 8 bit data
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        1, // correct parity bit
+        1, // stop bit
+      ]);
+      expect(decoder.getState()).toBe('end');
+      expect(decoder.data).toBe(0b10101110);
+    });
     test('goes back to idle state', () => {
       const decoder = new Decoder();
       writeAll(decoder, [
@@ -82,6 +100,7 @@ describe('Decoder', () => {
         0,
         1,
         1, // correct parity bit
+        1, // stop bit
         1, // idle bit
       ]);
       expect(decoder.getState()).toBe('idle');
@@ -99,6 +118,7 @@ describe('Decoder', () => {
         0,
         1,
         1, // correct parity bit
+        1, // stop bit
         0, // next start
       ]);
       expect(decoder.getState()).toBe('start');
@@ -116,6 +136,7 @@ describe('Decoder', () => {
         0,
         1,
         1, // correct parity bit
+        1, // stop bit
       ]);
       expect(decoder.data).toBe(0b10101110);
       writeAll(decoder, [
@@ -129,6 +150,7 @@ describe('Decoder', () => {
         0,
         0,
         0, // correct parity bit
+        1, // stop bit
       ]);
       expect(decoder.getState()).toBe('end');
       expect(decoder.data).toBe(0b00110000);
@@ -145,9 +167,91 @@ describe('Decoder', () => {
         1,
         1,
         0, // correct parity bit
+        1, // stop bit
       ]);
       expect(decoder.getState()).toBe('end');
       expect(decoder.data).toBe(0b11111111);
+    });
+  });
+  describe('abnormal behavior', () => {
+    test('parity error', () => {
+      const decoder = new Decoder();
+      writeAll(decoder, [
+        0, // start bit
+        0, // 8 bit data
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0, // wrong parity bit
+      ]);
+      expect(decoder.getState()).toBe('error');
+      expect(decoder.error).toStrictEqual({
+        type: 'parity',
+      });
+    });
+    test('keeps error state after receiving bits', () => {
+      const decoder = new Decoder();
+      writeAll(decoder, [
+        0, // start bit
+        0, // 8 bit data
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        0, // wrong parity bit
+        1, // other bits
+        0,
+        1,
+      ]);
+      expect(decoder.getState()).toBe('error');
+      expect(decoder.error).toStrictEqual({
+        type: 'parity',
+      });
+    });
+    test('errors for wrong stop bit', () => {
+      const decoder = new Decoder();
+      writeAll(decoder, [
+        0, // start bit
+        0, // 8 bit data
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        1, // parity bit
+        0, // wrong stop bit
+      ]);
+      expect(decoder.getState()).toBe('error');
+      expect(decoder.error).toStrictEqual({
+        type: 'stopbit',
+      });
+    });
+    test('goes back to idle by reset method', () => {
+      const decoder = new Decoder();
+      writeAll(decoder, [
+        0, // start bit
+        0, // 8 bit data
+        1,
+        1,
+        1,
+        0,
+        1,
+        0,
+        1,
+        1, // parity bit
+        0, // wrong stop bit
+      ]);
+      decoder.reset();
+      expect(decoder.getState()).toBe('idle');
     });
   });
 });

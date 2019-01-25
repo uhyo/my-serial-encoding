@@ -4,7 +4,14 @@ import { ErrorObject } from './error';
 /**
  * State of decoder.
  */
-export type State = 'idle' | 'start' | 'data' | 'parity' | 'end' | 'error';
+export type State =
+  | 'idle'
+  | 'start'
+  | 'data'
+  | 'parity'
+  | 'stop'
+  | 'end'
+  | 'error';
 
 export class Decoder {
   private state: State = 'idle';
@@ -34,6 +41,13 @@ export class Decoder {
     };
     validateOptions(opts);
     this.options = opts;
+  }
+
+  /**
+   * Reset to idle state.
+   */
+  public reset(): void {
+    this.state = 'idle';
   }
 
   /**
@@ -67,7 +81,26 @@ export class Decoder {
         const expectedParity = this.currentParity ^ this.options.parity!;
         if (bit === expectedParity) {
           // parity matches.
+          this.state = 'stop';
+        } else {
+          this.state = 'error';
+          this.error = {
+            type: 'parity',
+          };
+        }
+        break;
+      }
+      case 'stop': {
+        // expects stop bit.
+        if (bit === 1) {
+          // correct
           this.state = 'end';
+        } else {
+          // error
+          this.state = 'error';
+          this.error = {
+            type: 'stopbit',
+          };
         }
         break;
       }

@@ -6,5 +6,5 @@ export type ErrorObject =
       type: 'parity';
     }
   | {
-      type: 'endbit';
+      type: 'stopbit';
     };
