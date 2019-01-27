@@ -1,11 +1,13 @@
-import { EncodingOptions, defaultOptions, validateOptions } from '../options';
+import {
+  EncodingOptions,
+  defaultOptions,
+  validateOptions,
+} from '../options/encoding';
 
 /**
  * State of encoder.
  */
 export type State = 'idle' | 'start' | 'data' | 'parity' | 'end';
-
-export { EncodingOptions };
 
 export class Encoder {
   private state: State = 'idle';

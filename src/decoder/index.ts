@@ -1,4 +1,8 @@
-import { EncodingOptions, defaultOptions, validateOptions } from '../options';
+import {
+  EncodingOptions,
+  defaultOptions,
+  validateOptions,
+} from '../options/encoding';
 import { ErrorObject } from './error';
 
 /**
