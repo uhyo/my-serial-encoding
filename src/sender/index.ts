@@ -51,7 +51,11 @@ export class Sender<D extends SenderData> {
    * Removes remaining data to send.
    */
   public setData(d: D) {
-    this.data = d;
+    if (d.length === 0) {
+      this.data = null;
+    } else {
+      this.data = d;
+    }
     this.dataOffset = 0;
   }
   /**
@@ -73,12 +77,19 @@ export class Sender<D extends SenderData> {
     this.data = newData;
   }
   /**
+   * Reset remaining data to send.
+   */
+  public resetData() {
+    this.data = null;
+    this.dataOffset = 0;
+  }
+  /**
    * Write a tick to underlying channel.
    */
   private tick(): 0 | 1 {
     if (this.data != null) {
       const es = this.encoder.getState();
-      if (es === 'idle' || es === 'end') {
+      if (es === 'idle') {
         // next data can be written to encoder.
         this.encoder.setData(this.data[this.dataOffset]);
         this.moveDataOffset();
@@ -90,8 +101,9 @@ export class Sender<D extends SenderData> {
    * Move data offset to next.
    */
   private moveDataOffset() {
+    // istanbul ignore if
     if (this.data == null) {
-      return;
+      throw new Error('moveDataOffset should be called when data is present');
     }
     this.dataOffset++;
     if (this.dataOffset >= this.data.length) {
